@@ -1,0 +1,24 @@
+.create-daily-todo {
+    &__title {
+        font-size: 20px;
+    }
+
+    &__form {
+        display: grid;
+        row-gap: 15px;
+        .button {
+            width: auto;
+            justify-self: end;
+            padding: 10px;
+            font-size: medium;
+        }
+    }
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    > * {
+        padding: 10px;
+    }
+}

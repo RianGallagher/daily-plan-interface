@@ -1,0 +1,40 @@
+.modal {
+    &__overlay {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(63, 48, 48, 0.75);
+
+        // I want to center the content.
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__close-button {
+        display: flex;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+    }
+
+    position: absolute;
+    // top: 40px;
+    // left: 40px;
+    // right: 40px;
+    // bottom: 40px;
+    border: 1px solid #ccc;
+    background: #fff;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 4px;
+    outline: none;
+    padding: 20px;
+
+    // I want the height to be auto but I can't do that while the top and bottom properties are set.
+    height: auto;
+    // I want to set the width but I can't do that while the left and right properties are set.
+    width: 500px;
+}
