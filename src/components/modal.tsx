@@ -1,59 +1,78 @@
 import { createContext, FunctionComponent, useState } from "react";
 import ReactModal from "react-modal";
 import { AiOutlineCloseCircle } from "react-icons/ai";
-import "./modal.scss";
 import Button from "./button";
+import "./modal.scss";
 
-// Could I also incorporate react context somehow to give modal children access to props and utiltity functions?
-// Maybe I could have a separate hook that doesn't include props.
+ReactModal.setAppElement("#root");
 
-interface ModalUtilitites {
+interface ModalUtilities {
     readonly closeModal: VoidFunction;
     readonly openModal: VoidFunction;
+    readonly isOpen: boolean;
+    readonly canClose: boolean;
 }
 
-interface ReactModalProps {
-    readonly props: ReactModal.Props;
+interface UseModalConfiguration {
+    readonly canClose?: boolean;
+    readonly isOpen?: boolean;
 }
 
-type ModalProps = ModalUtilitites & ReactModalProps;
-
-export const useModal = (): ModalProps => {
-    const [isOpen, setIsOpen] = useState(false);
+/**
+ * A hook that is used to supply the Modal component with the props it needs. It also allows the user to use the modal
+ * utilities in the same comopnent that the Modal is rendered in. E.g you can open/close the modal.
+ * @returns Modal utilitites that will be passed as props to the Modal component.
+ */
+export const useModal = ({
+    canClose = true,
+    isOpen: initialIsOpen = false,
+}: UseModalConfiguration = {}): ModalUtilities => {
+    const [isOpen, setIsOpen] = useState(initialIsOpen);
     const openModal = () => setIsOpen(true);
     const closeModal = () => setIsOpen(false);
 
     return {
         closeModal,
         openModal,
-        props: { isOpen, shouldCloseOnEsc: true, shouldCloseOnOverlayClick: true },
+        isOpen,
+        canClose,
     };
 };
 
-const defaultContext: ModalUtilitites = {
+const defaultContext: ModalUtilities = {
+    canClose: true,
     closeModal: () => {},
+    isOpen: false,
     openModal: () => {},
 };
 
 export const ModalContext = createContext(defaultContext);
 
-ReactModal.setAppElement("#root");
-// interface ModalProps extends ReactModal.Props {}
-
-const Modal: FunctionComponent<ModalProps> = ({ props, ...modalUtilities }) => {
-    const { closeModal, children } = modalUtilities;
+/**
+ * A component that will display its children in a modal.
+ * @param props.children       The content of the modal.
+ * @param props.modalUtilities Utilities for interacting with the modal.
+ */
+const Modal: FunctionComponent<ModalUtilities> = ({ children, ...modalUtilities }) => {
+    const { canClose, closeModal, isOpen } = modalUtilities;
     return (
-        <ReactModal className="modal" onRequestClose={closeModal} overlayClassName="modal__overlay" {...props}>
-            <ModalContext.Provider value={modalUtilities}>
-                {children}
+        <ReactModal
+            className="modal"
+            isOpen={isOpen}
+            onRequestClose={closeModal}
+            overlayClassName="modal__overlay"
+            shouldCloseOnEsc={canClose}
+            shouldCloseOnOverlayClick={canClose}
+        >
+            {/* Wrap the children in a context provider so that all modal content can use the modal utilities. */}
+            <ModalContext.Provider value={modalUtilities}>{children}</ModalContext.Provider>
+            {canClose && (
                 <Button className="modal__close-button" onClick={closeModal}>
                     <AiOutlineCloseCircle size="18px" />
                 </Button>
-            </ModalContext.Provider>
+            )}
         </ReactModal>
     );
 };
 
-// I could definte types for this component so that they're the same as ReactModal and then wrap a context provider
-// around it.
 export default Modal;
